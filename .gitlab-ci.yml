@@ -1,40 +1,37 @@
-image: python:3.8
-
-services:
-  - postgres:latest
-
-variables:
-  POSTGRES_DB: mydatabase
-  POSTGRES_USER: myuser
-  POSTGRES_PASSWORD: mypassword
-  DATABASE_URL: postgres://myuser:mypassword@postgres:5432/mydatabase
-  GIT_SUBMODULE_STRATEGY: recursive
-
 stages:
   - build
   - test
   - deploy
 
-before_script:
-  - git submodule update --init --recursive
-  - pip install -r requirements.txt
-  - python manage.py migrate  # Menerapkan migrasi basis data
-
 build:
   stage: build
+  image: python:3.8
+  services:
+    - postgres:latest
+  variables:
+    POSTGRES_DB: mydatabase
+    POSTGRES_USER: user
+    POSTGRES_PASSWORD: password
   script:
-    - echo "Membangun proyek..."
-    # Tambahkan perintah build Anda di sini
+    - echo "Building the application..."
+    - python -m venv venv  # Membuat virtual environment
+    - source venv/bin/activate  # Mengaktifkan virtual environment
+    - pip install -r requirements.txt
 
 test:
   stage: test
+  image: python:3.8
   script:
-    - echo "Menjalankan tes..."
-    - python manage.py test  # Menjalankan tes
+    - echo "Running tests..."
+    - source venv/bin/activate  # Mengaktifkan virtual environment
+    - python conf.py test  # Menjalankan pengujian Django
 
 deploy:
   stage: deploy
+  image: python:3.8
   script:
-    - echo "Menyebarkan aplikasi..."
-    # Tambahkan perintah untuk deployment di sini
-
+    - echo "Deploying the application..."
+    - source venv/bin/activate  # Mengaktifkan virtual environment
+    - python conf.py migrate  # Menjalankan migrasi
+  only:
+    - main
