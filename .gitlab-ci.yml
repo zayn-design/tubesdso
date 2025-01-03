@@ -19,6 +19,8 @@ cache:
 before_script:
   - apt-get update -y
   - apt-get install -y git unzip libzip-dev
+  - pwd  # Menampilkan direktori kerja saat ini
+  - ls -la  # Menampilkan semua file dan direktori
   - cp .env.example .env
   - composer install --prefer-dist --no-ansi --no-interaction --no-progress --no-scripts
   - php artisan key:generate
