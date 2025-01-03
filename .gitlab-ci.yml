@@ -19,7 +19,6 @@ cache:
 before_script:
   - apt-get update -y
   - apt-get install -y git unzip libzip-dev
-  - docker-php-ext-install zip
   - cp .env.example .env
   - composer install --prefer-dist --no-ansi --no-interaction --no-progress --no-scripts
   - php artisan key:generate
