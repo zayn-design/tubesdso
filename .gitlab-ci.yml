@@ -1,48 +1,42 @@
-variables:
-  VENV_DIR: venv
-
 stages:
   - build
   - test
   - deploy
 
+variables:
+  VENV_DIR: venv
+
 build:
   stage: build
   image: python:3.8
-  services:
-    - postgres:latest
-  variables:
-    POSTGRES_DB: mydatabase
-    POSTGRES_USER: user
-    POSTGRES_PASSWORD: password
   script:
-    - echo "Building the application..."
-    - python -m venv venv  # Membuat virtual environment
-    - source venv/bin/activate  # Mengaktifkan virtual environment
+    - echo "Creating virtual environment..."
+    - python -m venv $VENV_DIR
+    - source $VENV_DIR/bin/activate
+    - echo "Installing dependencies..."
     - pip install -r requirements.txt
   artifacts:
     paths:
-     - $VENV_DIR  # Menyimpan virtual environment sebagai artifact
-    expire_in: 1 hour  # Menentukan waktu kedaluwarsa artifact
-  
+      - $VENV_DIR/
+
 test:
   stage: test
   image: python:3.8
   dependencies:
-    - build  # Mengambil artifact dari job build
+    - build
   script:
     - echo "Running tests..."
-    - source $VENV_DIR/bin/activate  # Mengaktifkan virtual environment
-    - python conf.py test  # Menjalankan pengujian
-    
+    - source $VENV_DIR/bin/activate
+    - python -m unittest discover -s trackingga/tests
+
 deploy:
   stage: deploy
   image: python:3.8
   dependencies:
-    - build  # Mengambil artifact dari job build
+    - build
   script:
     - echo "Deploying the application..."
-    - source $VENV_DIR/bin/activate  # Mengaktifkan virtual environment
-    - python conf.py migrate  # Menjalankan migrasi
+    - source $VENV_DIR/bin/activate
+    - python manage.py migrate
   only:
     - main
