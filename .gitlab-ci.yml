@@ -1,3 +1,6 @@
+variables:
+  VENV_DIR: venv
+
 stages:
   - build
   - test
@@ -26,17 +29,17 @@ test:
   stage: test
   image: python:3.8
   dependencies:
-    - build  # Menyatakan bahwa job ini bergantung pada job build
+    - build  # Mengambil artifact dari job build
   script:
     - echo "Running tests..."
     - source $VENV_DIR/bin/activate  # Mengaktifkan virtual environment
     - python conf.py test  # Menjalankan pengujian
-  
+    
 deploy:
   stage: deploy
   image: python:3.8
   dependencies:
-    - build  # Menyatakan bahwa job ini bergantung pada job build
+    - build  # Mengambil artifact dari job build
   script:
     - echo "Deploying the application..."
     - source $VENV_DIR/bin/activate  # Mengaktifkan virtual environment
