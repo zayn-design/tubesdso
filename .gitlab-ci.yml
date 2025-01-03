@@ -4,39 +4,46 @@ stages:
   - deploy
 
 variables:
-  VENV_DIR: venv
+  APP_ENV: testing
+  DB_CONNECTION: sqlite
+  DB_DATABASE: ":memory:"
+  CACHE_DRIVER: file
+  SESSION_DRIVER: file
+  QUEUE_DRIVER: sync
+
+cache:
+  paths:
+    - vendor/
+    - node_modules/
+
+before_script:
+  - apt-get update -y
+  - apt-get install -y git unzip libzip-dev
+  - docker-php-ext-install zip
+  - cp .env.example .env
+  - composer install --prefer-dist --no-ansi --no-interaction --no-progress --no-scripts
+  - php artisan key:generate
+  - php artisan config:cache
 
 build:
   stage: build
-  image: python:3.8
   script:
-    - echo "Creating virtual environment..."
-    - python -m venv $VENV_DIR
-    - source $VENV_DIR/bin/activate
-    - echo "Installing dependencies..."
-    - pip install -r requirements.txt
+    - npm install
+    - npm run production
   artifacts:
     paths:
-      - $VENV_DIR/
+      - public/js
+      - public/css
 
 test:
   stage: test
-  image: python:3.8
-  dependencies:
-    - build
   script:
-    - echo "Running tests..."
-    - source $VENV_DIR/bin/activate
-    - python -m unittest discover -s trackingga/tests
+    - vendor/bin/phpunit --coverage-text --colors=never
 
 deploy:
   stage: deploy
-  image: python:3.8
-  dependencies:
-    - build
   script:
     - echo "Deploying the application..."
-    - source $VENV_DIR/bin/activate
-    - python manage.py migrate
+    # Tambahkan perintah untuk menyebarkan aplikasi Anda di sini
   only:
     - main
